@@ -1,0 +1,11 @@
+include LICENSE
+include README.md
+recursive-include ban/static *
+recursive-include ban/templates *
+recursive-include ban/templatetags *
+recursive-include ban/management *
+recursive-include ban/fixtures *
+recursive-include ban/resources *
+recursive-include ban/migrations *
+global-exclude *pyc
+global-exclude ~*

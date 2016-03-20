@@ -1,0 +1,4 @@
+coverage
+django==1.8
+django-debug-toolbar
+selenium
