@@ -32,6 +32,8 @@ class TestBan(BaseTestCase):
         Ban.objects.create(creator=self.harriet, receiver=self.florence)
 
         # She tries to log in.
+        self.login_as_test_user()
+
         # She is redirected to the homepage.
         # She sees a message that she was banned.
         self.fail()
