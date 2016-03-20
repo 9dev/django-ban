@@ -9,5 +9,16 @@
 			"is_superuser": true, 
 			"is_staff": true
 		}
+	},
+	{
+		"model": "auth.user",
+		"pk": 2,
+		"fields": {
+			"username": "test_user1",
+			"password": "pbkdf2_sha256$12000$NDBMzLyJdeEZ$Zv9oQaVL8dq0xVN1dTpG6msSgIhy73PGEE1HzchJNe8=",
+			"is_active": true,
+			"is_superuser": false,
+			"is_staff": false
+		}
 	}
 ]
