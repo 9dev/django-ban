@@ -26,3 +26,6 @@ class TestBan(BaseTestCase):
 
     def test_user_gets_banned_after_too_many_warnings(self):
         self.fail()
+
+    def test_multiple_bans_merge_into_one(self):
+        self.fail()
