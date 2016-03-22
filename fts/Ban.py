@@ -1,6 +1,7 @@
 from ._base import BaseTestCase
 
 from datetime import datetime, timedelta, timezone
+import dateutil.parser
 from selenium.webdriver.support.ui import Select
 
 from django.conf import settings
@@ -39,7 +40,30 @@ class TestBan(BaseTestCase):
         )
 
     def test_can_ban_user_for_month(self):
-        self.fail()
+        # Harriet logs in as an admin.
+        self.login_as_admin()
+
+        # She hits the admin panel for users.
+        self.get('/admin/auth/user')
+
+        # She bans user with pk=2 for a month.
+        self.browser.find_element_by_css_selector('input.action-select[value="2"]').click()
+        select = Select(self.browser.find_element_by_css_selector('select[name="action"]'))
+        select.select_by_visible_text('Ban selected users for month')
+        self.browser.find_element_by_css_selector('button[name="index"]').click()
+
+        # She goes to the admin panel for bans.
+        self.get('/admin/ban/ban')
+
+        # She sees a ban for this user ending in a month.
+        row = self.browser.find_element_by_class_name('row1').text
+        found_end_text = row.replace('test_user1', '').replace('admin', '')
+        found_end_ts = dateutil.parser.parse(found_end_text).replace(tzinfo=timezone.utc).timestamp()
+        expected_end_ts = (datetime.now(timezone.utc) + timedelta(days=30)).timestamp()
+
+        self.assertTrue(row.startswith('test_user1'))
+        self.assertTrue(row.endswith('admin'))
+        self.assertAlmostEqual(expected_end_ts, found_end_ts, delta=60)
 
     def test_can_ban_user_for_week(self):
         self.fail()
