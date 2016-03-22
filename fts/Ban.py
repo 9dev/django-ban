@@ -103,4 +103,28 @@ class TestBan(BaseTestCase):
         self.fail()
 
     def test_multiple_bans_merge_into_one(self):
-        self.fail()
+        # Florence was banned some time ago.
+        end_date = datetime.now(timezone.utc) + timedelta(days=1)
+        Ban.objects.create(creator=self.harriet, receiver=self.florence, end_date=end_date)
+
+        # Harriet logs in as an admin.
+        self.login_as_admin()
+
+        # She hits the admin panel for users.
+        self.get('/admin/auth/user')
+
+        # She bans Florence permanently.
+        self.select_admin_object(self.florence.pk)
+        self.admin_action('Ban selected users permanently')
+
+        # She goes to the admin panel for bans.
+        self.get('/admin/ban/ban')
+
+        # She sees a permanent ban for Florence with no end date.
+        self.assertEqual(
+            self.browser.find_element_by_class_name('row1').text,
+            'test_user1 (None) admin',
+        )
+
+        # She does not see any other bans for Florence as they were merged into one.
+        self.assertIn('1 ban', self.get_text())
