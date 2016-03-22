@@ -1,5 +1,7 @@
 from ._base import BaseTestCase
 
+from datetime import datetime, timedelta, timezone
+
 from django.conf import settings
 from django.contrib.auth.models import User
 
@@ -42,7 +44,18 @@ class TestBan(BaseTestCase):
         self.assertIn('This account has been banned.', self.get_text())
 
     def test_banned_user_can_log_in_after_ban_period(self):
-        self.fail()
+        # Florence was banned some time ago, but is active now.
+        end_date = datetime.now(timezone.utc) - timedelta(days=1)
+        Ban.objects.create(creator=self.harriet, receiver=self.florence, end_date=end_date)
+
+        # She logs in.
+        self.login_as_test_user()
+
+        # She is redirected to the login redirect url.
+        self.assertEqual(self.browser.current_url, '{}{}'.format(self.live_server_url, settings.LOGIN_REDIRECT_URL))
+
+        # She doesn't see a message that she was banned.
+        self.assertNotIn('This account has been banned.', self.get_text())
 
     def test_user_gets_banned_after_too_many_warnings(self):
         self.fail()
