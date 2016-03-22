@@ -16,6 +16,30 @@ class TestBan(BaseTestCase):
         self.harriet = User.objects.get(pk=1)
         self.florence = User.objects.get(pk=2)
 
+    def assert_can_ban_user_for_period(self, period_name, period_length):
+        # Harriet logs in as an admin.
+        self.login_as_admin()
+
+        # She hits the admin panel for users.
+        self.get('/admin/auth/user')
+
+        # She bans user with pk=2 for requested period of time.
+        self.select_admin_object(2)
+        self.admin_action('Ban selected users for {}'.format(period_name))
+
+        # She goes to the admin panel for bans.
+        self.get('/admin/ban/ban')
+
+        # She sees a ban for this user ending after specified period.
+        row = self.browser.find_element_by_class_name('row1').text
+        found_end_text = row.replace('test_user1', '').replace('admin', '')
+        found_end_ts = dateutil.parser.parse(found_end_text).replace(tzinfo=timezone.utc).timestamp()
+        expected_end_ts = (datetime.now(timezone.utc) + timedelta(days=period_length)).timestamp()
+
+        self.assertTrue(row.startswith('test_user1'))
+        self.assertTrue(row.endswith('admin'))
+        self.assertAlmostEqual(expected_end_ts, found_end_ts, delta=60)
+
     def test_can_ban_user_permanently(self):
         # Harriet logs in as an admin.
         self.login_as_admin()
@@ -37,35 +61,13 @@ class TestBan(BaseTestCase):
         )
 
     def test_can_ban_user_for_month(self):
-        # Harriet logs in as an admin.
-        self.login_as_admin()
-
-        # She hits the admin panel for users.
-        self.get('/admin/auth/user')
-
-        # She bans user with pk=2 for a month.
-
-        self.select_admin_object(2)
-        self.admin_action('Ban selected users for month')
-
-        # She goes to the admin panel for bans.
-        self.get('/admin/ban/ban')
-
-        # She sees a ban for this user ending in a month.
-        row = self.browser.find_element_by_class_name('row1').text
-        found_end_text = row.replace('test_user1', '').replace('admin', '')
-        found_end_ts = dateutil.parser.parse(found_end_text).replace(tzinfo=timezone.utc).timestamp()
-        expected_end_ts = (datetime.now(timezone.utc) + timedelta(days=30)).timestamp()
-
-        self.assertTrue(row.startswith('test_user1'))
-        self.assertTrue(row.endswith('admin'))
-        self.assertAlmostEqual(expected_end_ts, found_end_ts, delta=60)
+        self.assert_can_ban_user_for_period('month', 30)
 
     def test_can_ban_user_for_week(self):
-        self.fail()
+        self.assert_can_ban_user_for_period('week', 7)
 
     def test_can_ban_user_for_day(self):
-        self.fail()
+        self.assert_can_ban_user_for_period('day', 1)
 
     def test_can_warn_user(self):
         self.fail()

@@ -11,7 +11,12 @@ USER_MODEL = get_user_model()
 
 
 class ExtendedUserAdmin(UserAdmin):
-    actions = ['ban_selected_users_permanently', 'ban_selected_users_for_month']
+    actions = [
+        'ban_selected_users_permanently',
+        'ban_selected_users_for_month',
+        'ban_selected_users_for_week',
+        'ban_selected_users_for_day',
+    ]
 
     def ban_selected_users_permanently(self, request, queryset):
         for user in queryset:
@@ -19,10 +24,21 @@ class ExtendedUserAdmin(UserAdmin):
         self.message_user(request, "Successfully banned selected users permanently.")
 
     def ban_selected_users_for_month(self, request, queryset):
-        end_date = datetime.now(timezone.utc) + timedelta(days=30)
+        self._ban(request, queryset, 30)
+        self.message_user(request, "Successfully banned selected users for a month.")
+
+    def ban_selected_users_for_week(self, request, queryset):
+        self._ban(request, queryset, 7)
+        self.message_user(request, "Successfully banned selected users for a week.")
+
+    def ban_selected_users_for_day(self, request, queryset):
+        self._ban(request, queryset, 1)
+        self.message_user(request, "Successfully banned selected users for a day.")
+
+    def _ban(self, request, queryset, days):
+        end_date = datetime.now(timezone.utc) + timedelta(days=days)
         for user in queryset:
             Ban.objects.create(receiver=user, creator=request.user, end_date=end_date)
-        self.message_user(request, "Successfully banned selected users for a month.")
 
 
 class BanAdmin(admin.ModelAdmin):
