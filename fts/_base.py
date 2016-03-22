@@ -21,6 +21,12 @@ class BaseTestCase(StaticLiveServerTestCase):
             url = reverse(name, *args, **kwargs)
         self.browser.get('{}{}'.format(self.live_server_url, url))
 
+    def login_as_admin(self):
+        self.get('/admin')
+        self.set_field('id_username', 'admin')
+        self.set_field('id_password', 'admin')
+        self.submit()
+
     def login_as_test_user(self):
         self.get('/login')
         self.set_field('id_username', 'test_user1')

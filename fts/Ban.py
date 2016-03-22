@@ -1,6 +1,7 @@
 from ._base import BaseTestCase
 
 from datetime import datetime, timedelta, timezone
+from selenium.webdriver.support.ui import Select
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -16,7 +17,26 @@ class TestBan(BaseTestCase):
         self.florence = User.objects.get(pk=2)
 
     def test_can_ban_user_permanently(self):
-        self.fail()
+        # Harriet logs in as an admin.
+        self.login_as_admin()
+
+        # She hits the admin panel for users.
+        self.get('/admin/auth/user')
+
+        # She bans user with pk=2 permanently.
+        self.browser.find_element_by_css_selector('input.action-select[value="2"]').click()
+        select = Select(self.browser.find_element_by_css_selector('select[name="action"]'))
+        select.select_by_visible_text('Ban selected users permanently')
+        self.browser.find_element_by_css_selector('button[name="index"]').click()
+
+        # She goes to the admin panel for bans.
+        self.get('/admin/ban/ban')
+
+        # She sees a ban for this user with no end date.
+        self.assertEqual(
+            self.browser.find_element_by_class_name('row1').text,
+            'test_user1 (None) admin',
+        )
 
     def test_can_ban_user_for_month(self):
         self.fail()
