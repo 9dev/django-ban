@@ -19,7 +19,7 @@ class Warn(models.Model):
 
 
 @receiver(pre_save, sender=Ban)
-def on_save_approve(sender, instance, **kwargs):
+def pre_save_ban(sender, instance, **kwargs):
     try:
         ban = Ban.objects.get(receiver=instance.receiver)
         if instance.end_date is None or instance.end_date > ban.end_date:
