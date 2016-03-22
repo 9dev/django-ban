@@ -38,3 +38,6 @@ class BaseTestCase(StaticLiveServerTestCase):
     def submit(self):
         form = self.browser.find_element_by_tag_name('form')
         form.submit()
+
+    def get_text(self):
+        return self.browser.find_element_by_tag_name('body').text

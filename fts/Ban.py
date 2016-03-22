@@ -1,5 +1,6 @@
 from ._base import BaseTestCase
 
+from django.conf import settings
 from django.contrib.auth.models import User
 
 from ban.models import Ban
@@ -34,9 +35,11 @@ class TestBan(BaseTestCase):
         # She tries to log in.
         self.login_as_test_user()
 
-        # She is redirected to the homepage.
+        # She is redirected to the login page.
+        self.assertEqual(self.browser.current_url, '{}{}/'.format(self.live_server_url, settings.LOGIN_URL))
+
         # She sees a message that she was banned.
-        self.fail()
+        self.assertIn('This account has been banned.', self.get_text())
 
     def test_banned_user_can_log_in_after_ban_period(self):
         self.fail()
