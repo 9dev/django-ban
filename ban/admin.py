@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from ban.models import Ban
+
+
+admin.site.register(Ban)
