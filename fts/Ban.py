@@ -5,8 +5,9 @@ import dateutil.parser
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.test import override_settings
 
-from ban.models import Ban
+from ban.models import Ban, Warn
 
 
 class TestBan(BaseTestCase):
@@ -116,8 +117,36 @@ class TestBan(BaseTestCase):
         # She doesn't see a message that she was banned.
         self.assertNotIn('This account has been banned.', self.get_text())
 
+    @override_settings(WARNS_THRESHOLD=3)
     def test_user_gets_banned_after_too_many_warnings(self):
-        self.fail()
+        # Florence has been warned two times already.
+        Warn.objects.create(receiver=self.florence, creator=self.harriet)
+        Warn.objects.create(receiver=self.florence, creator=self.harriet)
+
+        # Harriet logs in as an admin.
+        self.login_as_admin()
+
+        # She hits the admin panel for users.
+        self.get('/admin/auth/user')
+
+        # She warns Florence.
+        self.select_admin_object(self.florence.pk)
+        self.admin_action('Warn selected users')
+
+        # She goes to the admin panel for warns.
+        self.get('/admin/ban/warn')
+
+        # She sees no warns there.
+        self.assertIn('0 warns', self.get_text())
+
+        # She goes to the admin panel for bans.
+        self.get('/admin/ban/ban')
+
+        # She sees a ban for Florence with no end date.
+        self.assertEqual(
+            self.browser.find_element_by_class_name('row1').text,
+            'test_user1 (None) (None)',
+        )
 
     def test_multiple_bans_merge_into_one(self):
         # Florence was banned some time ago.

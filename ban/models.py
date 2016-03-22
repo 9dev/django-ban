@@ -9,7 +9,7 @@ USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 class Ban(models.Model):
     receiver = models.ForeignKey(USER_MODEL, unique=True)
-    creator = models.ForeignKey(USER_MODEL, related_name='ban_creator')
+    creator = models.ForeignKey(USER_MODEL, related_name='ban_creator', null=True, blank=True, default=None)
     end_date = models.DateTimeField(null=True, blank=True, default=None)
 
 
@@ -28,3 +28,16 @@ def on_save_approve(sender, instance, **kwargs):
             instance.delete()
     except Ban.DoesNotExist:
         pass
+
+
+@receiver(pre_save, sender=Warn)
+def pre_save_warn(sender, instance, **kwargs):
+    threshold = getattr(settings, 'WARNS_THRESHOLD', None)
+
+    if threshold:
+        warns = Warn.objects.filter(receiver=instance.receiver)
+
+        if warns.count() >= threshold-1:
+            Ban.objects.create(receiver=instance.receiver)
+            warns.delete()
+            instance.delete()
