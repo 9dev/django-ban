@@ -38,7 +38,7 @@ class TestBan(BaseTestCase):
         self.login_as_test_user()
 
         # She is redirected to the login page.
-        self.assertEqual(self.browser.current_url, '{}{}/'.format(self.live_server_url, settings.LOGIN_URL))
+        self.assertEqual(self.browser.current_url, '{}{}'.format(self.live_server_url, settings.LOGIN_URL))
 
         # She sees a message that she was banned.
         self.assertIn('This account has been banned.', self.get_text())
