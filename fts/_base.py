@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.support.ui import Select
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.core.urlresolvers import reverse
@@ -47,3 +48,11 @@ class BaseTestCase(StaticLiveServerTestCase):
 
     def get_text(self):
         return self.browser.find_element_by_tag_name('body').text
+
+    def select_admin_object(self, value):
+        self.browser.find_element_by_css_selector('input.action-select[value="{}"]'.format(value)).click()
+
+    def admin_action(self, action):
+        select = Select(self.browser.find_element_by_css_selector('select[name="action"]'))
+        select.select_by_visible_text(action)
+        self.browser.find_element_by_css_selector('button[name="index"]').click()
