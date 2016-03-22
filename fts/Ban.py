@@ -24,21 +24,21 @@ class TestBan(BaseTestCase):
         # She hits the admin panel for users.
         self.get('/admin/auth/user')
 
-        # She bans user with pk=2 for requested period of time.
-        self.select_admin_object(2)
+        # She bans Florence for requested period of time.
+        self.select_admin_object(self.florence.pk)
         self.admin_action('Ban selected users for {}'.format(period_name))
 
         # She goes to the admin panel for bans.
         self.get('/admin/ban/ban')
 
-        # She sees a ban for this user ending after specified period.
+        # She sees a ban for Florence ending after specified period.
         row = self.browser.find_element_by_class_name('row1').text
-        found_end_text = row.replace('test_user1', '').replace('admin', '')
+        found_end_text = row.replace(self.florence.username, '').replace(self.harriet.username, '')
         found_end_ts = dateutil.parser.parse(found_end_text).replace(tzinfo=timezone.utc).timestamp()
         expected_end_ts = (datetime.now(timezone.utc) + timedelta(days=period_length)).timestamp()
 
-        self.assertTrue(row.startswith('test_user1'))
-        self.assertTrue(row.endswith('admin'))
+        self.assertTrue(row.startswith(self.florence.username))
+        self.assertTrue(row.endswith(self.harriet.username))
         self.assertAlmostEqual(expected_end_ts, found_end_ts, delta=60)
 
     def test_can_ban_user_permanently(self):
@@ -48,14 +48,14 @@ class TestBan(BaseTestCase):
         # She hits the admin panel for users.
         self.get('/admin/auth/user')
 
-        # She bans user with pk=2 permanently.
-        self.select_admin_object(2)
+        # She bans Florence permanently.
+        self.select_admin_object(self.florence.pk)
         self.admin_action('Ban selected users permanently')
 
         # She goes to the admin panel for bans.
         self.get('/admin/ban/ban')
 
-        # She sees a ban for this user with no end date.
+        # She sees a ban for Florence with no end date.
         self.assertEqual(
             self.browser.find_element_by_class_name('row1').text,
             'test_user1 (None) admin',
