@@ -70,7 +70,24 @@ class TestBan(BaseTestCase):
         self.assert_can_ban_user_for_period('day', 1)
 
     def test_can_warn_user(self):
-        self.fail()
+        # Harriet logs in as an admin.
+        self.login_as_admin()
+
+        # She hits the admin panel for users.
+        self.get('/admin/auth/user')
+
+        # She warns Florence.
+        self.select_admin_object(self.florence.pk)
+        self.admin_action('Warn selected users')
+
+        # She goes to the admin panel for warns.
+        self.get('/admin/ban/warn')
+
+        # She sees a warn for Florence.
+        self.assertEqual(
+            self.browser.find_element_by_class_name('row1').text,
+            'test_user1 admin',
+        )
 
     def test_banned_user_cannot_log_in(self):
         # Florence was banned some time ago.
