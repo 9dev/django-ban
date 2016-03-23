@@ -20,5 +20,27 @@
 			"is_superuser": false,
 			"is_staff": false
 		}
+	},
+	{
+		"model": "auth.user",
+		"pk": 3,
+		"fields": {
+			"username": "test_user2",
+			"password": "pbkdf2_sha256$12000$NDBMzLyJdeEZ$Zv9oQaVL8dq0xVN1dTpG6msSgIhy73PGEE1HzchJNe8=",
+			"is_active": true,
+			"is_superuser": false,
+			"is_staff": false
+		}
+	},
+	{
+		"model": "auth.user",
+		"pk": 4,
+		"fields": {
+			"username": "test_user3",
+			"password": "pbkdf2_sha256$12000$NDBMzLyJdeEZ$Zv9oQaVL8dq0xVN1dTpG6msSgIhy73PGEE1HzchJNe8=",
+			"is_active": true,
+			"is_superuser": false,
+			"is_staff": false
+		}
 	}
 ]
