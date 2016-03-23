@@ -5,6 +5,7 @@ import dateutil.parser
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.management import call_command
 from django.test import override_settings
 
 from ban.models import Ban, Warn
@@ -194,3 +195,24 @@ class TestBan(BaseTestCase):
 
         # She sees no warns there.
         self.assertIn('0 warns', self.get_text())
+
+    def test_can_clean_inactive_bans(self):
+        # There are some inactive bans.
+        end_date = datetime.now(timezone.utc) - timedelta(days=1)
+        Ban.objects.create(creator=self.harriet, receiver=User.objects.get(pk=3), end_date=end_date)
+        Ban.objects.create(creator=self.harriet, receiver=User.objects.get(pk=4), end_date=end_date)
+
+        # And also one active one.
+        Ban.objects.create(creator=self.harriet, receiver=self.florence)
+
+        # Harriet calls management command to clean up inactive bans.
+        call_command('clean_inactive_bans')
+
+        # She logs in as an admin.
+        self.login_as_admin()
+
+        # She goes to the admin panel for bans.
+        self.get('/admin/ban/ban')
+
+        # She sees only one ban there.
+        self.assertIn('1 ban', self.get_text())
