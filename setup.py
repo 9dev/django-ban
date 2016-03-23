@@ -14,9 +14,9 @@ setup(
     packages=['ban'],
     include_package_data=True,
     license='MIT License',
-    description='...',
+    description='Django app that adds bans and warnings to the user system.',
     long_description=README,
-    url='...',
+    url='https://github.com/9dev/django-ban',
     author='9dev',
     author_email='9devmail@gmail.com',
     classifiers=[
