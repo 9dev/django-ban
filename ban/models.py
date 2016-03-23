@@ -1,5 +1,8 @@
+from datetime import datetime, timezone
+
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
@@ -40,4 +43,10 @@ def pre_save_warn(sender, instance, **kwargs):
         if warns.count() >= threshold-1:
             Ban.objects.create(receiver=instance.receiver)
             warns.delete()
+            instance.delete()
+
+    if instance:
+        now = datetime.now(timezone.utc)
+        bans = Ban.objects.filter(receiver=instance.receiver).filter(Q(end_date__isnull=True) | Q(end_date__gt=now))
+        if bans.count() > 0:
             instance.delete()

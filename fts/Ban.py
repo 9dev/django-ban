@@ -174,3 +174,23 @@ class TestBan(BaseTestCase):
 
         # She does not see any other bans for Florence as they were merged into one.
         self.assertIn('1 ban', self.get_text())
+
+    def test_cannot_warn_banned_user(self):
+        # Florence was banned some time ago.
+        Ban.objects.create(creator=self.harriet, receiver=self.florence)
+
+        # Harriet logs in as an admin.
+        self.login_as_admin()
+
+        # She hits the admin panel for users.
+        self.get('/admin/auth/user')
+
+        # She warns Florence.
+        self.select_admin_object(self.florence.pk)
+        self.admin_action('Warn selected users')
+
+        # She goes to the admin panel for warns.
+        self.get('/admin/ban/warn')
+
+        # She sees no warns there.
+        self.assertIn('0 warns', self.get_text())
